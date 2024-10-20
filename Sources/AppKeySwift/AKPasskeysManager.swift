@@ -30,7 +30,7 @@ import os
 @available(macOS 13.0, *)
 public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     
-    static let shared = AKPasskeysManager()
+    public static let shared = AKPasskeysManager()
     var authenticationAnchor: ASPresentationAnchor?
     @Published var attestationResponse: String?
     @Published var assertionnResponse: String?

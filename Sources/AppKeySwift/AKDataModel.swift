@@ -26,153 +26,153 @@ import Foundation
 
 @available(macOS 13.0, *)
 public struct AKUser:Codable {
-    var id:String = ""
-    var name:String = ""
-    var displayName:String = ""
-    var handle: String = ""
+    public var id:String = ""
+    public var name:String = ""
+    public var displayName:String = ""
+    public var handle: String = ""
 }
 
 @available(macOS 13.0, *)
 public struct AKLoginChallenge:Decodable {
     
     
-    var rpId: String
-    var challenge:String
-    var allowCredentials: [AKCredential]
-    var timeout: Int
-    var userVerification: String
-    var requireAddPasskey:Bool?
+    public var rpId: String
+    public var challenge:String
+    public var allowCredentials: [AKCredential]
+    public var timeout: Int
+    public var userVerification: String
+    public var requireAddPasskey:Bool?
 }
 
 @available(macOS 13.0, *)
 public struct AKCredential: Decodable {
-    var id:String
-    var type:String
+    public var id:String
+    public var type:String
 }
 
 @available(macOS 13.0, *)
 public struct AKRegister: Decodable {
-    var status:Bool
-    var message: String
-    var user: AKUser
+    public var status:Bool
+    public var message: String
+    public var user: AKUser
 }
 
 @available(macOS 13.0, *)
 public struct AKErrorReturn: Decodable {
-    var code:Bool
-    var message: String
+    public var code:Bool
+    public var message: String
 }
 
 @available(macOS 13.0, *)
 public struct AKSignupChallenge: Decodable {
-    var challenge:String
-    var user: AKUser
+    public var challenge:String
+    public var user: AKUser
 }
 
 @available(macOS 13.0, *)
 public struct AKAttestReponse:Codable {
-    var attestationObject:String
-    var clientDataJSON:String
+    public var attestationObject:String
+    public var clientDataJSON:String
 }
 
 @available(macOS 13.0, *)
 public struct AKAttestation:Codable {
-    var id:String
-    var rawId:String?
-    var authenticatorAttachment:String?
-    var type:String?
-    var response:AKAttestReponse
+    public var id:String
+    public var rawId:String?
+    public var authenticatorAttachment:String?
+    public var type:String?
+    public var response:AKAttestReponse
 }
 
 @available(macOS 13.0, *)
 public struct AKAssertion:Codable {
-    var id:String
-    var rawId:String?
-    var authenticatorAttachment:String?
-    var type:String?
-    var response:AKAssertResponse
+    public var id:String
+    public var rawId:String?
+    public var authenticatorAttachment:String?
+    public var type:String?
+    public var response:AKAssertResponse
 }
 
 @available(macOS 13.0, *)
 public struct AKAssertResponse:Codable {
-    var authenticatorData:String
-    var clientDataJSON:String
-    var signature:String
-    var userHandle:String
+    public var authenticatorData:String
+    public var clientDataJSON:String
+    public var signature:String
+    public var userHandle:String
 }
 
 @available(macOS 13.0, *)
 public struct AKAuthenticationInfo:Decodable {
-    let newCounter:Int
-    let credentialID:String
-    let userVerified:Bool
-    let credentialDeviceType:String
-    let credentialBackedUp:Bool
-    let origin:String
-    let rpID:String
+    public let newCounter:Int
+    public let credentialID:String
+    public let userVerified:Bool
+    public let credentialDeviceType:String
+    public let credentialBackedUp:Bool
+    public let origin:String
+    public let rpID:String
 }
 
 @available(macOS 13.0, *)
 public struct Application:Codable {
-    let appId:String
-    let displayAppId:String
-    let name:String
-    let userId:String
-    let status:String
-    let handleType:String
-    let emailExtension:Bool
-    let appPublicKey:String
-    let appToken:String
-    let signup:String
-    let anonymousLoginEnabled:Bool
-    let userNamesEnabled:Bool
-    let userJWTExpiration:Int
-    let locales:[String]
+    public let appId:String
+    public let displayAppId:String
+    public let name:String
+    public let userId:String
+    public let status:String
+    public let handleType:String
+    public let emailExtension:Bool
+    public let appPublicKey:String
+    public let appToken:String
+    public let signup:String
+    public let anonymousLoginEnabled:Bool
+    public let userNamesEnabled:Bool
+    public let userJWTExpiration:Int
+    public let locales:[String]
     
 }
 
 @available(macOS 13.0, *)
 public struct AppUser:Codable {
-    let appUserId:String
-    let displayName:String
-    let handle:String
-    let status:String
-    let appId:String
-    var accessToken:String?
-    var signUpToken:String?
-    var jwt:String?
-    let userName:String?
-    let locale:String?
-    let lastLogin: String?
+    public let appUserId:String
+    public let displayName:String
+    public let handle:String
+    public let status:String
+    public let appId:String
+    public var accessToken:String?
+    public var signUpToken:String?
+    public var jwt:String?
+    public let userName:String?
+    public let locale:String?
+    public let lastLogin: String?
 }
 
 @available(macOS 13.0, *)
 public struct SignupData:Codable {
     
-    let handle:String
-    let message:String
-    var signUpToken:String?
+    public let handle:String
+    public let message:String
+    public var signUpToken:String?
 }
 
 @available(macOS 13.0, *)
 struct Passkey:Codable {
-    let id:String
-    let publicKey:String
-    let counter:Int
-    let deviceType:String
-    let credentialBackedUp:String
-    let name:String
-    let platform:String
-    let lastUsed: Date
-    let createdAt: Date
-    let updatedAt: Date
+    public let id:String
+    public let publicKey:String
+    public let counter:Int
+    public let deviceType:String
+    public let credentialBackedUp:String
+    public let name:String
+    public let platform:String
+    public let lastUsed: Date
+    public let createdAt: Date
+    public let updatedAt: Date
     
 }
 
 @available(macOS 13.0, *)
 struct LoginComplete:Decodable {
-    let verified:Bool
-    let authenticationInfo:AKAuthenticationInfo
+    public let verified:Bool
+    public let authenticationInfo:AKAuthenticationInfo
     
 }
 
