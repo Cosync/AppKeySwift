@@ -31,15 +31,15 @@ import os
 public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
     
     public static let shared = AKPasskeysManager()
-    var authenticationAnchor: ASPresentationAnchor?
-    @Published var attestationResponse: String?
-    @Published var assertionnResponse: String?
-    @Published var verifcationResponse: String?
-    @Published var status: String?
-    @Published var errorResponse: String?
-    var attestation: AKAttestation?
-    var assertion: AKAssertion?
-    let logger = Logger()
+    public var authenticationAnchor: ASPresentationAnchor?
+    @Published public var attestationResponse: String?
+    @Published public var assertionnResponse: String?
+    @Published public var verifcationResponse: String?
+    @Published public var status: String?
+    @Published public var errorResponse: String?
+    public var attestation: AKAttestation?
+    public var assertion: AKAssertion?
+    public let logger = Logger()
     
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
