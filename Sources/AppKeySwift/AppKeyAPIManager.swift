@@ -31,7 +31,7 @@ import os
 @available(macOS 13.0, *)
 @MainActor public class AppKeyAPIManager:ObservableObject {
     
-    static let shared = AppKeyAPIManager()
+    public static let shared = AppKeyAPIManager()
     
     // Configuration
     public var appToken: String?
