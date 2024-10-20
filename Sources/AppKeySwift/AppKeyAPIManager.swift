@@ -38,10 +38,10 @@ import os
     public var appKeyRestAddress: String?
 
     // Session state
-    var appUser:AppUser? = nil
-    var application:Application? = nil
-    var accessToken:String = ""
-    let logger = Logger()
+    public var appUser:AppUser? = nil
+    public var application:Application? = nil
+    public var accessToken:String = ""
+    public let logger = Logger()
     
     // Configure
     @MainActor public func configure(appToken: String, appKeyRestAddress: String = "") {
