@@ -244,7 +244,7 @@ extension Data {
 }
 
 @available(macOS 13.0, *)
-extension String {
+public extension String {
     
     var fromBase64 :String {
         let data = Data(base64Encoded: self)
