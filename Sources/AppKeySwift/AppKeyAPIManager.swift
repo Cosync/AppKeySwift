@@ -38,8 +38,8 @@ import os
     public var appKeyRestAddress: String?
 
     // Session state
-    public var appUser:AppUser? = nil
-    public var application:Application? = nil
+    public var appUser:AKAppUser? = nil
+    public var application:AKApplication? = nil
     public var accessToken:String = ""
     public let logger = Logger()
     
@@ -59,7 +59,7 @@ import os
         }
     }
     
-    @MainActor public func getApp() async throws -> Application? {
+    @MainActor public func getApp() async throws -> AKApplication? {
         
         do {
             guard let appToken = self.appToken else {
@@ -81,7 +81,7 @@ import os
             let (data, response) = try await session.data(from: url)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            let app = try JSONDecoder().decode(Application.self, from: data)
+            let app = try JSONDecoder().decode(AKApplication.self, from: data)
             
             self.application = app
             // print(self.application)
@@ -98,7 +98,7 @@ import os
     }
     
     
-    @MainActor public func getAppUser(user:AppUser) async throws -> AppUser {
+    @MainActor public func getAppUser(user:AKAppUser) async throws -> AKAppUser {
         
         guard let appKeyRestAddress = self.appKeyRestAddress else {
             throw AppKeyError.appKeyConfiguration
@@ -124,7 +124,7 @@ import os
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            let result = try JSONDecoder().decode(AppUser.self, from: data)
+            let result = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             // print("getAppUser app \(result)")
             self.appUser = result
@@ -218,7 +218,7 @@ import os
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            var user = try JSONDecoder().decode(AppUser.self, from: data)
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String
@@ -240,7 +240,7 @@ import os
         
     }
     
-    @MainActor public func signupConfirm(handle:String, attest:AKAttestation) async throws -> SignupData {
+    @MainActor public func signupConfirm(handle:String, attest:AKAttestation) async throws -> AKSignupData {
         
         guard let appToken = self.appToken else {
             throw AppKeyError.appKeyConfiguration
@@ -274,7 +274,7 @@ import os
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            var signData = try JSONDecoder().decode(SignupData.self, from: data)
+            var signData = try JSONDecoder().decode(AKSignupData.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 signData.signUpToken = json["signup-token"] as? String
@@ -383,7 +383,7 @@ import os
             // print("loginAnonymousComplete data \(data.base64URLEncode().base64Decoded()!)")
             
             
-            var user = try JSONDecoder().decode(AppUser.self, from: data)
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String
@@ -468,7 +468,7 @@ import os
     }
     
     
-    @MainActor public func loginComplete(handle:String, assertion:AKAssertion) async throws -> AppUser? {
+    @MainActor public func loginComplete(handle:String, assertion:AKAssertion) async throws -> AKAppUser? {
         
         guard let appToken = self.appToken else {
             throw AppKeyError.appKeyConfiguration
@@ -509,7 +509,7 @@ import os
             
             // print("loginComplete jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
             
-            var user = try JSONDecoder().decode(AppUser.self, from: data)
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String

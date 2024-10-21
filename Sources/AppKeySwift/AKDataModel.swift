@@ -113,7 +113,7 @@ public struct AKAuthenticationInfo:Decodable {
 }
 
 @available(macOS 13.0, *)
-public struct Application:Codable {
+public struct AKApplication:Codable {
     public let appId:String
     public let displayAppId:String
     public let name:String
@@ -132,7 +132,7 @@ public struct Application:Codable {
 }
 
 @available(macOS 13.0, *)
-public struct AppUser:Codable {
+public struct AKAppUser:Codable {
     public let appUserId:String
     public let displayName:String
     public let handle:String
@@ -147,7 +147,7 @@ public struct AppUser:Codable {
 }
 
 @available(macOS 13.0, *)
-public struct SignupData:Codable {
+public struct AKSignupData:Codable {
     
     public let handle:String
     public let message:String
@@ -155,7 +155,7 @@ public struct SignupData:Codable {
 }
 
 @available(macOS 13.0, *)
-struct Passkey:Codable {
+struct AKPasskey:Codable {
     public let id:String
     public let publicKey:String
     public let counter:Int
@@ -170,7 +170,7 @@ struct Passkey:Codable {
 }
 
 @available(macOS 13.0, *)
-struct LoginComplete:Decodable {
+struct AKLoginComplete:Decodable {
     public let verified:Bool
     public let authenticationInfo:AKAuthenticationInfo
     
