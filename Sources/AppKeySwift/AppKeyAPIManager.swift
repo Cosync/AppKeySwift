@@ -86,10 +86,7 @@ extension String {
     // Configure
     @MainActor public func configure(appToken: String, appKeyRestAddress: String = "", rawPublicKey: String = "") {
         
-        appUser = nil
-        application = nil
-        accessToken = ""
-        jwt = nil
+        logout()
         
         self.appToken = appToken
         if appKeyRestAddress == "" {
@@ -238,7 +235,7 @@ extension String {
         }
     }
     
-    @MainActor public func signup(handle:String, displayName:String, localse:String? = nil) async throws -> AKSignupChallenge? {
+    @MainActor public func signup(handle:String, displayName:String, locale:String? = nil) async throws -> AKSignupChallenge? {
         
         guard let appToken = self.appToken else {
             throw AppKeyError.appKeyConfiguration
@@ -276,58 +273,6 @@ extension String {
             
             return result
             
-            
-        }
-        catch let error as AppKeyError {
-            throw error
-        }
-        catch {
-            throw error
-        }
-        
-    }
-    
-    
-    
-    @MainActor public func signupComplete(signupToken:String, code:String) async throws -> Bool {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/signupComplete"
-        
-        do {
-            
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [URLQueryItem(name: "code", value: code)]
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.allHTTPHeaderFields = ["signup-token": signupToken]
-            urlRequest.httpMethod = "POST"
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                self.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.accessToken = user.accessToken!
-            self.appUser = user
-            
-            return true
             
         }
         catch let error as AppKeyError {
@@ -392,24 +337,18 @@ extension String {
     }
     
     
-    @MainActor public func loginAnonymous(uuidString: String) async throws -> AKSignupChallenge? {
-        
-        guard let appToken = self.appToken else {
-            throw AppKeyError.appKeyConfiguration
-        }
+    @MainActor public func signupComplete(signupToken:String, code:String) async throws -> Bool {
         
         guard let appKeyRestAddress = self.appKeyRestAddress else {
             throw AppKeyError.appKeyConfiguration
         }
 
-        let url = "\(appKeyRestAddress)/api/appuser/loginAnonymous"
+        let url = "\(appKeyRestAddress)/api/appuser/signupComplete"
         
         do {
             
-            let handle = "ANON_\(uuidString)"
-            
             var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [URLQueryItem(name: "handle", value: handle)]
+            requestBodyComponents.queryItems = [URLQueryItem(name: "code", value: code)]
             
             let config = URLSessionConfiguration.default
             let session = URLSession(configuration: config)
@@ -418,85 +357,31 @@ extension String {
             var urlRequest = URLRequest(url: url)
             urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.allHTTPHeaderFields = ["app-token": appToken]
+            urlRequest.allHTTPHeaderFields = ["signup-token": signupToken]
             urlRequest.httpMethod = "POST"
             urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
             
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
-            
-            // print("loginAnonymous return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let result = try JSONDecoder().decode(AKSignupChallenge.self, from: data)
-            
-            // print("login server response \(result)")
-            
-            return result
-            
-        }
-        catch let error as AppKeyError {
-            print("login error \(error.message)")
-            throw error
-        }
-        catch {
-            print("login error \(error.localizedDescription)")
-            throw error
-        }
-    }
-    
-    
-    @MainActor public func loginAnonymousComplete(handle:String, attest:AKAttestation) async throws -> Bool {
-        
-        guard let appToken = self.appToken else {
-            throw AppKeyError.appKeyConfiguration
-        }
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/loginAnonymousComplete"
-        do {
-            
-            let attetstRsponse = "{\"attestationObject\": \"\(attest.response.attestationObject)\", \"clientDataJSON\": \"\(attest.response.clientDataJSON)\"}"
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [URLQueryItem(name: "handle", value: handle),
-                                                URLQueryItem(name: "id", value: attest.id),
-                                                URLQueryItem(name: "response", value: attetstRsponse )
-            ]
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.allHTTPHeaderFields = ["app-token": appToken]
-            urlRequest.httpMethod = "POST"
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            // print("loginAnonymousComplete data \(data.base64URLEncode().base64Decoded()!)")
-            
             
             var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String
-                self.jwt = json["jwt"] as? String
+                user.jwt = json["jwt"] as? String
             }
-            
             
             self.appUser = user
             
             if let accessToken = user.accessToken {
                 self.accessToken = accessToken
             }
+            if let jwt = user.jwt {
+                self.jwt = jwt
+            }
             
             return true
+            
         }
         catch let error as AppKeyError {
             throw error
@@ -504,9 +389,8 @@ extension String {
         catch {
             throw error
         }
+        
     }
-    
-    
     
     @MainActor public func login(handle:String) async throws -> AKLoginChallenge? {
         
@@ -613,12 +497,18 @@ extension String {
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String
-                self.jwt = json["jwt"] as? String
+                user.jwt = json["jwt"] as? String
             }
             
             
             self.appUser = user
-            self.accessToken = user.accessToken!
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
+            }
+            if let jwt = user.jwt {
+                self.jwt = jwt
+            }
             return user
         }
         catch let error as AppKeyError {
@@ -631,62 +521,24 @@ extension String {
     }
     
     
-    @MainActor public func userNameAvailable(userName:String) async throws -> Bool {
+    @MainActor public func loginAnonymous(uuidString: String) async throws -> AKSignupChallenge? {
         
-        do {
-            
-            guard let appKeyRestAddress = self.appKeyRestAddress else {
-                throw AppKeyError.appKeyConfiguration
-            }
-
-            guard let url = URL(string: "\(appKeyRestAddress)/api/appuser/userNameAvailable?userName=\(userName)") else {
-                throw AppKeyError.invalidData
-            }
-            
-            let config = URLSessionConfiguration.default
-            config.httpAdditionalHeaders = ["access-token": accessToken]
-            
-            let session = URLSession(configuration: config)
-            let (data, response) = try await session.data(from: url)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            guard let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                throw AppKeyError.internalServerError
-            }
-            
-            if let available = json["available"] as? Bool {
-                return available
-            }
-            else {
-                return false
-            }
-            
-            
+        guard let appToken = self.appToken else {
+            throw AppKeyError.appKeyConfiguration
         }
-        catch let error as AppKeyError {
-            throw error
-        }
-        catch {
-            throw error
-        }
-    }
-    
-    
-    @MainActor public func setUserName(userName:String) async throws -> Bool {
         
         guard let appKeyRestAddress = self.appKeyRestAddress else {
             throw AppKeyError.appKeyConfiguration
         }
 
-        let url = "\(appKeyRestAddress)/api/appuser/setUsername"
+        let url = "\(appKeyRestAddress)/api/appuser/loginAnonymous"
+        
         do {
             
+            let handle = "ANON_\(uuidString)"
             
             var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [
-                URLQueryItem(name: "userName", value: userName)
-            ]
-            
+            requestBodyComponents.queryItems = [URLQueryItem(name: "handle", value: handle)]
             
             let config = URLSessionConfiguration.default
             let session = URLSession(configuration: config)
@@ -695,17 +547,86 @@ extension String {
             var urlRequest = URLRequest(url: url)
             urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.allHTTPHeaderFields = ["app-token": appToken]
             urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
             
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            // print("loginAnonymous return data \(data.base64URLEncode().base64Decoded()!)")
+            
+            let result = try JSONDecoder().decode(AKSignupChallenge.self, from: data)
+            
+            // print("login server response \(result)")
+            
+            return result
+            
+        }
+        catch let error as AppKeyError {
+            print("login error \(error.message)")
+            throw error
+        }
+        catch {
+            print("login error \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    
+    @MainActor public func loginAnonymousComplete(handle:String, attest:AKAttestation) async throws -> Bool {
+        
+        guard let appToken = self.appToken else {
+            throw AppKeyError.appKeyConfiguration
+        }
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/loginAnonymousComplete"
+        do {
+            
+            let attetstRsponse = "{\"attestationObject\": \"\(attest.response.attestationObject)\", \"clientDataJSON\": \"\(attest.response.clientDataJSON)\"}"
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [URLQueryItem(name: "handle", value: handle),
+                                                URLQueryItem(name: "id", value: attest.id),
+                                                URLQueryItem(name: "response", value: attetstRsponse )
+            ]
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.allHTTPHeaderFields = ["app-token": appToken]
+            urlRequest.httpMethod = "POST"
             urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
             
             
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
+            // print("loginAnonymousComplete data \(data.base64URLEncode().base64Decoded()!)")
             
-            // print("setUsername jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
+            
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
+                user.accessToken = json["access-token"] as? String
+                user.jwt = json["jwt"] as? String
+            }
+            
+            
+            self.appUser = user
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
+            }
+            if let jwt = user.jwt {
+                self.jwt = jwt
+            }
             
             return true
         }
@@ -716,55 +637,6 @@ extension String {
             throw error
         }
     }
-    
-    
-    
-    @MainActor public func setUserLocale(locale:String) async throws -> Bool {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/setLocale"
-        do {
-            
-            
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [
-                URLQueryItem(name: "locale", value: locale)
-            ]
-            
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
-            
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            
-            // print("locale jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
-            
-            return true
-        }
-        catch let error as AppKeyError {
-            throw error
-        }
-        catch {
-            throw error
-        }
-    }
-    
-    
     
     @MainActor public func verify(handle:String) async throws -> AKLoginChallenge? {
         
@@ -816,9 +688,6 @@ extension String {
             throw error
         }
     }
-    
-    
-    
     
     @MainActor public func verifyComplete(handle:String, assertion:AKAssertion) async throws -> Bool {
         
@@ -883,6 +752,146 @@ extension String {
         }
     }
     
+    @MainActor public func logout() {
+        self.appToken = nil
+        self.appKeyRestAddress = nil
+        self.rawPublicKey = nil
+        
+        self.appUser = nil
+        self.application = nil
+        self.accessToken = ""
+        self.jwt = nil
+    }
+    
+    @MainActor public func setUserLocale(locale:String) async throws -> Bool {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/setLocale"
+        do {
+            
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                URLQueryItem(name: "locale", value: locale)
+            ]
+            
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            
+            // print("locale jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
+            
+            return true
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw error
+        }
+    }
+    
+    @MainActor public func setUserName(userName:String) async throws -> Bool {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/setUsername"
+        do {
+            
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                URLQueryItem(name: "userName", value: userName)
+            ]
+            
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            
+            // print("setUsername jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
+            
+            return true
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw error
+        }
+    }
+    
+    @MainActor public func userNameAvailable(userName:String) async throws -> Bool {
+        
+        do {
+            
+            guard let appKeyRestAddress = self.appKeyRestAddress else {
+                throw AppKeyError.appKeyConfiguration
+            }
+
+            guard let url = URL(string: "\(appKeyRestAddress)/api/appuser/userNameAvailable?userName=\(userName)") else {
+                throw AppKeyError.invalidData
+            }
+            
+            let config = URLSessionConfiguration.default
+            config.httpAdditionalHeaders = ["access-token": accessToken]
+            
+            let session = URLSession(configuration: config)
+            let (data, response) = try await session.data(from: url)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            guard let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
+                throw AppKeyError.internalServerError
+            }
+            
+            if let available = json["available"] as? Bool {
+                return available
+            }
+            else {
+                return false
+            }
+            
+            
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw error
+        }
+    }
     
 }
 
