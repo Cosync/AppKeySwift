@@ -25,7 +25,7 @@
 import Foundation
 import AuthenticationServices
 import SwiftUI
-import os
+ 
 
 @available(macOS 13.0, *)
 public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationControllerPresentationContextProviding, ASAuthorizationControllerDelegate {
@@ -39,13 +39,13 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
     @Published public var errorResponse: String?
     public var attestation: AKAttestation?
     public var assertion: AKAssertion?
-    public let logger = Logger()
+     
     
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         
         guard let authorizationError = error as? ASAuthorizationError else {
-            logger.log("Unexpected authorization error: \(error.localizedDescription)")
+            print("Unexpected authorization error: \(error.localizedDescription)")
             
             errorResponse = error.localizedDescription
             
@@ -55,8 +55,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
         if authorizationError.code == .canceled {
             // Either the system doesn't find any credentials and the request ends silently, or the user cancels the request.
             // This is a good time to show a traditional login form, or ask the user to create an account.
-            logger.log("Request canceled.")
-            logger.log("Error: \((error as NSError).userInfo)")
+        
             let error = (error as NSError).userInfo
             errorResponse = error["NSLocalizedFailureReason"] as? String
             status = "canceled"
@@ -64,7 +63,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             // Another ASAuthorization error.
             // Note: The userInfo dictionary contains useful information.
             let error = (error as NSError).userInfo
-            logger.log("Error: \(error)")
+            print("Error: \(error)")
             errorResponse = error["NSLocalizedFailureReason"] as? String
             status = "error"
         }
@@ -142,22 +141,12 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             let clientDataJSON = credentialRegistration.rawClientDataJSON
             let credentialID = credentialRegistration.credentialID
             
-            
-            logger.log("============================== ASAuthorizationPublicKeyCredentialRegistration ")
-            logger.log("Register-attestationObject：", attestationObject.base64URLEncode())
-            logger.log("Register-clientDataJSON：base64EncodedString ", clientDataJSON.base64EncodedString())
-            logger.log("Register-clientDataJSON：base64Decoded ", clientDataJSON.base64URLEncode().base64Decoded()!)
-            logger.log("Register-credentialID base64URLEncode：", credentialID.base64URLEncode())
-            
-            
-            
             let registerAttest = AKAttestation(id: credentialID.base64URLEncode(),
                                                response: AKAttestReponse(attestationObject: attestationObject.base64URLEncode(), clientDataJSON: clientDataJSON.base64URLEncode()))
             
             self.attestation = registerAttest
             
-            logger.log("============================== attestationObject base64Decoded \(attestationObject.base64URLEncode().base64Decoded() ?? "") ")
-            
+           
             let payload = ["id": credentialID.base64URLEncode(),
                            "response": [
                             "attestationObject": attestationObject.base64URLEncode(),
@@ -179,15 +168,15 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
         case let credentialAssertion as ASAuthorizationPlatformPublicKeyCredentialAssertion:
            
             guard let signature = credentialAssertion.signature else {
-                logger.log("Missing signature")
+                print("Missing signature")
                 return
             }
             guard let authenticatorData = credentialAssertion.rawAuthenticatorData else {
-                logger.log("Missing authenticatorData")
+                print("Missing authenticatorData")
                 return
             }
             guard let userID = credentialAssertion.userID else {
-                logger.log("Missing userID")
+                print("Missing userID")
                 return
             }
             
@@ -205,7 +194,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
                            ]
             ] as [String: Any]
             
-            logger.log("============================== payload \(payload)")
+           
             
             if let payloadJSONData = try? JSONSerialization.data(withJSONObject: payload, options: .fragmentsAllowed) {
                 guard let payloadJSONText = String(data: payloadJSONData, encoding: .utf8) else { return }
@@ -223,10 +212,10 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             }
             
         case let signInWithAppleCredential as ASAuthorizationAppleIDCredential:
-            logger.log("============================== signInWithAppleCredential \(signInWithAppleCredential)")
+            print("============================== signInWithAppleCredential \(signInWithAppleCredential)")
             
         case let passwordCredential as ASPasswordCredential:
-            logger.log("============================== passwordCredential \(passwordCredential)")
+            print("============================== passwordCredential \(passwordCredential)")
             
         default:
             fatalError("Received unknown authorization type.")

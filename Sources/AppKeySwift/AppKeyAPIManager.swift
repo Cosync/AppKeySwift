@@ -24,7 +24,7 @@
 
 import Foundation
 import CryptoKit
-import os
+ 
 
 @available(macOS 10.14, *)
 extension String {
@@ -81,7 +81,7 @@ extension String {
     public var application:AKApplication? = nil
     public var accessToken:String = ""
     public var jwt: String?
-    public let logger = Logger()
+   
     
     // Configure
     @MainActor public func configure(appToken: String, appKeyRestAddress: String = "", rawPublicKey: String = "") {
@@ -221,7 +221,7 @@ extension String {
             
             let result = try JSONDecoder().decode(AKAppUser.self, from: data)
             
-            logger.info("getAppUser app \(result)")
+            
             self.appUser = result
             
             return result
@@ -430,7 +430,7 @@ extension String {
                 throw AppKeyError.internalServerError
             }
             
-            logger.info("login json \(json)")
+            print("login json \(json)")
             
             if json["requireAddPasskey"] is Bool {
                 throw AppKeyError.accountNoPasskey
@@ -442,11 +442,11 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            logger.info("login error \(error.message)")
+            print("login error \(error.message)")
             throw error
         }
         catch {
-            logger.info("login error \(error.localizedDescription)")
+            print("login error \(error.localizedDescription)")
             throw error
         }
     }
@@ -515,7 +515,7 @@ extension String {
             throw error
         }
         catch {
-            logger.info(error.localizedDescription)
+            print(error.localizedDescription)
             throw error
         }
     }
@@ -564,11 +564,11 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            logger.info("login error \(error.message)")
+           
             throw error
         }
         catch {
-            logger.info("login error \(error.localizedDescription)")
+            
             throw error
         }
     }
@@ -680,16 +680,16 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            logger.info("verify error \(error.message)")
+           
             throw error
         }
         catch {
-            logger.info("verify error \(error.localizedDescription)")
+            
             throw error
         }
     }
     
-    @MainActor public func verifyComplete(handle:String, assertion:AKAssertion) async throws -> AKUser {
+    @MainActor public func verifyComplete(handle:String, assertion:AKAssertion) async throws -> AKAppUser {
         
         guard let appToken = self.appToken else {
             throw AppKeyError.appKeyConfiguration
@@ -755,7 +755,7 @@ extension String {
             throw error
         }
         catch {
-            logger.info(error.localizedDescription)
+           
             throw error
         }
     }
