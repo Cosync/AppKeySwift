@@ -143,11 +143,11 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             let credentialID = credentialRegistration.credentialID
             
             
-            print("============================== ASAuthorizationPublicKeyCredentialRegistration ")
-            print("Register-attestationObject：", attestationObject.base64URLEncode())
-            print("Register-clientDataJSON：base64EncodedString ", clientDataJSON.base64EncodedString())
-            print("Register-clientDataJSON：base64Decoded ", clientDataJSON.base64URLEncode().base64Decoded()!)
-            print("Register-credentialID base64URLEncode：", credentialID.base64URLEncode())
+            logger.log("============================== ASAuthorizationPublicKeyCredentialRegistration ")
+            logger.log("Register-attestationObject：", attestationObject.base64URLEncode())
+            logger.log("Register-clientDataJSON：base64EncodedString ", clientDataJSON.base64EncodedString())
+            logger.log("Register-clientDataJSON：base64Decoded ", clientDataJSON.base64URLEncode().base64Decoded()!)
+            logger.log("Register-credentialID base64URLEncode：", credentialID.base64URLEncode())
             
             
             
@@ -177,8 +177,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             
             
         case let credentialAssertion as ASAuthorizationPlatformPublicKeyCredentialAssertion:
-            //print("A passkey was used to sign in: \(credentialAssertion)")
-            
+           
             guard let signature = credentialAssertion.signature else {
                 logger.log("Missing signature")
                 return

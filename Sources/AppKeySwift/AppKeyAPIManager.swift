@@ -221,7 +221,7 @@ extension String {
             
             let result = try JSONDecoder().decode(AKAppUser.self, from: data)
             
-            // print("getAppUser app \(result)")
+            logger.info("getAppUser app \(result)")
             self.appUser = result
             
             return result
@@ -269,7 +269,7 @@ extension String {
             
             let result = try JSONDecoder().decode(AKSignupChallenge.self, from: data)
             
-            print("register response \(result)")
+            //print("register response \(result)")
             
             return result
             
@@ -442,11 +442,11 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            print("login error \(error.message)")
+            logger.info("login error \(error.message)")
             throw error
         }
         catch {
-            print("login error \(error.localizedDescription)")
+            logger.info("login error \(error.localizedDescription)")
             throw error
         }
     }
@@ -515,7 +515,7 @@ extension String {
             throw error
         }
         catch {
-            print(error.localizedDescription)
+            logger.info(error.localizedDescription)
             throw error
         }
     }
@@ -564,11 +564,11 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            print("login error \(error.message)")
+            logger.info("login error \(error.message)")
             throw error
         }
         catch {
-            print("login error \(error.localizedDescription)")
+            logger.info("login error \(error.localizedDescription)")
             throw error
         }
     }
@@ -680,16 +680,16 @@ extension String {
             
         }
         catch let error as AppKeyError {
-            print("verify error \(error.message)")
+            logger.info("verify error \(error.message)")
             throw error
         }
         catch {
-            print("verify error \(error.localizedDescription)")
+            logger.info("verify error \(error.localizedDescription)")
             throw error
         }
     }
     
-    @MainActor public func verifyComplete(handle:String, assertion:AKAssertion) async throws -> Bool {
+    @MainActor public func verifyComplete(handle:String, assertion:AKAssertion) async throws -> AKUser {
         
         guard let appToken = self.appToken else {
             throw AppKeyError.appKeyConfiguration
@@ -728,29 +728,38 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            print("verifyComplete return data \(data.base64URLEncode().base64Decoded()!)")
+            //print("verifyComplete return data \(data.base64URLEncode().base64Decoded()!)")
             
-            guard let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                throw AppKeyError.internalServerError
+            
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
+                user.accessToken = json["access-token"] as? String
+                user.jwt = json["jwt"] as? String
             }
             
-            logger.info("verifyComplete json = \(json)")
             
-            if let valid = json["valid"] as? Bool {
-                return valid
+            self.appUser = user
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
             }
-            else {
-                return false
+            if let jwt = user.jwt {
+                self.jwt = jwt
             }
+            return user
+            
+             
         }
         catch let error as AppKeyError {
             throw error
         }
         catch {
-            print(error.localizedDescription)
+            logger.info(error.localizedDescription)
             throw error
         }
     }
+    
     
     @MainActor public func logout() {
         self.appToken = nil
@@ -892,6 +901,44 @@ extension String {
             throw error
         }
     }
+    
+    // user must do verify ceramony process to get new access token before call this deleteAccount
+    @MainActor public func deleteAccount() async throws -> Bool {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/deleteAccount"
+        do {
+             
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            // print("locale jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
+            
+            return true
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw error
+        }
+    }
+    
     
 }
 
