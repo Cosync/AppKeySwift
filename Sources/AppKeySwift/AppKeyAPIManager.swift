@@ -761,10 +761,7 @@ extension String {
     }
     
     
-    @MainActor public func logout() {
-        self.appToken = nil
-        self.appKeyRestAddress = nil
-        self.rawPublicKey = nil
+    @MainActor public func logout() { 
         
         self.appUser = nil
         self.application = nil
