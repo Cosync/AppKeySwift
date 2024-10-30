@@ -13,6 +13,17 @@ let package = Package(
         .library(
             name: "AppKeySwift",
             targets: ["AppKeySwift"]),
+        .library(
+            name: "AppKeyGoogleAuth",
+            targets: ["AppKeyGoogleAuth"]),
+    ],
+    dependencies: [
+        // Dependencies declare other packages that this package depends on.
+        // .package(url: /* package url */, from: "1.0.0"),
+        .package(
+            url: "https://github.com/google/GoogleSignIn-iOS",
+            from: "7.0.0"
+        )
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -20,6 +31,14 @@ let package = Package(
         .target(
             name: "AppKeySwift",
             dependencies: []),
+        .target(
+            name: "AppKeyGoogleAuth",
+            dependencies: [.product(name: "GoogleSignInSwift", package: "googlesignin-ios")],
+            path: "Sources/AppKeySocialAuth"),
+        .testTarget(
+            name: "AppKeySwiftTests",
+            dependencies: ["AppKeySwift"]),
+        
 
     ]
 )

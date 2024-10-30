@@ -126,6 +126,10 @@ public struct AKApplication:Codable {
     public let signup:String
     public let anonymousLoginEnabled:Bool
     public let userNamesEnabled:Bool
+    public let googleLoginEnabled:Bool
+    public let appleLoginEnabled:Bool
+    public let googleClientId:String?
+    public let appleBundleId:String?
     public let userJWTExpiration:Int
     public let locales:[String]
     

@@ -179,7 +179,7 @@ extension String {
             let app = try JSONDecoder().decode(AKApplication.self, from: data)
             
             self.application = app
-            // print(self.application)
+             print(self.application)
             return app
             
         }
@@ -899,6 +899,7 @@ extension String {
         }
     }
     
+    
     // user must do verify ceramony process to get new access token before call this deleteAccount
     @MainActor public func deleteAccount() async throws -> Bool {
         
@@ -936,6 +937,174 @@ extension String {
         }
     }
     
+    
+    
+    
+    // Singup into AppKey with Apple
+    @MainActor public func socialSignup(_ token: String, email:String, provider:String, displayName: String, locale: String? = nil) async throws -> AKAppUser {
+        
+        guard let appToken = self.appToken else {
+            throw AppKeyError.appKeyConfiguration
+        }
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let _ = try await self.getApp()
+
+        if provider == "google"{
+            guard self.application!.googleLoginEnabled == true else {
+                throw AppKeyError.googleLoginNotSupported
+            }
+        }
+        else if provider == "apple" {
+            guard self.application!.appleLoginEnabled == true else {
+                throw AppKeyError.appleLoginNotSupported
+            }
+        }
+        
+        let config = URLSessionConfiguration.default
+
+        let session = URLSession(configuration: config)
+            
+        let url = URL(string: "\(appKeyRestAddress)/api/appuser/socialSignup")!
+    
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.allHTTPHeaderFields = ["app-token": appToken]
+
+        var requestBodyComponents = URLComponents()
+        
+        requestBodyComponents.queryItems = [URLQueryItem(name: "token", value: token),
+                                        URLQueryItem(name: "provider", value: provider),
+                                        URLQueryItem(name: "displayName", value: displayName),
+                                        URLQueryItem(name: "handle", value: email)]
+        
+        if let locale = locale {
+            requestBodyComponents.queryItems?.append(URLQueryItem(name: "locale", value: locale))
+        }
+       
+        
+        urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+        
+        do {
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            
+            // ensure there is no error for this HTTP response
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
+                user.accessToken = json["access-token"] as? String
+                user.jwt = json["jwt"] as? String
+            }
+            
+            
+            self.appUser = user
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
+            }
+            
+            if let jwt = user.jwt {
+                self.jwt = jwt
+            }
+            
+            return user
+             
+            
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw AppKeyError.internalServerError
+        }
+
+    }
+    
+     
+    
+    // Login into AppKey
+    @MainActor public func socialLogin(_ token: String, provider: String) async throws -> AKAppUser {
+        
+        
+        guard let appToken = self.appToken else {
+            throw AppKeyError.appKeyConfiguration
+        }
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+         
+        let _ = try await self.getApp()
+        
+        if provider == "google"{
+            guard self.application!.googleLoginEnabled == true else {
+                throw AppKeyError.googleLoginNotSupported
+            }
+        }
+        else if provider == "apple" {
+            guard self.application!.appleLoginEnabled == true else {
+                throw AppKeyError.appleLoginNotSupported
+            }
+        }
+       
+        
+        do {
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [URLQueryItem(name: "token", value: token),
+                                                URLQueryItem(name: "provider", value: provider)]
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            
+            let url = URL(string: "\(appKeyRestAddress)/api/appuser/socialLogin")!
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.allHTTPHeaderFields = ["app-token": appToken]
+            urlRequest.httpMethod = "POST"
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
+                user.accessToken = json["access-token"] as? String
+                user.jwt = json["jwt"] as? String
+            }
+            
+            
+            self.appUser = user
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
+            }
+            if let jwt = user.jwt {
+                self.jwt = jwt
+            }
+            return user
+         
+        }
+        catch let error as AppKeyError {
+             throw error
+        }
+        catch {
+            throw AppKeyError.internalServerError
+        }
+
+
+    }
+    
+     
     
 }
 
