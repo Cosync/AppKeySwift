@@ -39,7 +39,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
     @Published public var errorResponse: String?
     public var attestation: AKAttestation?
     public var assertion: AKAssertion?
-     
+    public var signInWithAppleCredential:ASAuthorizationAppleIDCredential?
     
     
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
@@ -131,6 +131,22 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
         }
     }
     
+    
+    
+    // https://forums.developer.apple.com/forums/thread/733946
+    public func signInWithAppleButton(anchor: ASPresentationAnchor) {
+        
+        self.authenticationAnchor = anchor
+       
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
+        let authController = ASAuthorizationController(authorizationRequests: [request])
+        authController.delegate = self
+        authController.presentationContextProvider = self
+        authController.performRequests()
+    }
+    
+    
     // https://developer.apple.com/videos/play/wwdc2022/10092/
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization){
         switch authorization.credential {
@@ -211,8 +227,15 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
                 // login request
             }
             
-        case let signInWithAppleCredential as ASAuthorizationAppleIDCredential:
-            print("============================== signInWithAppleCredential \(signInWithAppleCredential)")
+        case let appleCredential as ASAuthorizationAppleIDCredential:
+            print("============================== signInWithAppleCredential \(appleCredential)")
+            signInWithAppleCredential = appleCredential
+           
+            if let identityToken = signInWithAppleCredential?.identityToken {
+                let idToken = String(data: identityToken, encoding: .utf8)
+                print("Apple token \(idToken)")
+                self.verifcationResponse = idToken
+            }
             
         case let passwordCredential as ASPasswordCredential:
             print("============================== passwordCredential \(passwordCredential)")
