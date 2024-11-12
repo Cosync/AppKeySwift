@@ -130,6 +130,7 @@ public struct AKApplication:Codable {
     public let appleLoginEnabled:Bool
     public let googleClientId:String?
     public let appleBundleId:String?
+    public let relyPartyId:String?
     public let userJWTExpiration:Int
     public let locales:[String]
     

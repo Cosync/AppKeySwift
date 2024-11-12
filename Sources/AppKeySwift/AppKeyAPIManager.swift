@@ -364,6 +364,8 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
+            print("signupComplete jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
+            
             var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
