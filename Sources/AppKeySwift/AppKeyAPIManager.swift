@@ -435,7 +435,7 @@ extension String {
             print("login json \(json)")
             
             if json["requireAddPasskey"] is Bool {
-                throw AppKeyError.accountNoPasskey
+                throw AppKeyError.passkeyNotExist
             }
             
             let result = try JSONDecoder().decode(AKLoginChallenge.self, from: data)
