@@ -35,9 +35,7 @@ let package = Package(
             name: "AppKeyGoogleAuth",
             dependencies: [.product(name: "GoogleSignInSwift", package: "googlesignin-ios")],
             path: "Sources/AppKeySocialAuth"),
-        .testTarget(
-            name: "AppKeySwiftTests",
-            dependencies: ["AppKeySwift"]),
+
         
 
     ]

@@ -61,7 +61,8 @@ public enum AppKeyError: Error {
     case passkeyNotExist                // 614
     case invalidPasskey                 // 615
     case accountAlreadyExist            // 616
-    case invalidHandleFormate           // 617
+    case invalidHandleFormat            // 617
+    case accountNoPasskey               // 618
     
     public var message: String {
         switch self {
@@ -137,8 +138,10 @@ public enum AppKeyError: Error {
             return "invalid passkey"
         case .accountAlreadyExist:
             return "user already exists"
-        case .invalidHandleFormate:
-            return "invalid handle formate"
+        case .invalidHandleFormat:
+            return "invalid handle format"
+        case .accountNoPasskey:
+            return "account has no passkey"
         
         }
     }
@@ -225,7 +228,7 @@ public enum AppKeyError: Error {
                         case 616:
                             throw AppKeyError.accountAlreadyExist
                         case 617:
-                            throw AppKeyError.invalidHandleFormate
+                            throw AppKeyError.invalidHandleFormat
                        
 
                         default:
