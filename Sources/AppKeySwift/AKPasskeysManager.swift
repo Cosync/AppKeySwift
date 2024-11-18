@@ -324,6 +324,17 @@ public extension String {
         return result
         
     }
+    
+    
+    var isValidEmail: Bool {
+        NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}").evaluate(with: self)
+    }
+    
+    var isValidPhone: Bool {
+        let phoneRegex = "^\\+(?:[0-9 ]?){8,16}[0-9]$"
+        let phoneTest = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
+        return phoneTest.evaluate(with: self)
+    }
 }
 
 @available(macOS 13.0, *)
