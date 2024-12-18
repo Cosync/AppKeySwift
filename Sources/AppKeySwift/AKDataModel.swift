@@ -37,8 +37,7 @@ public struct AKLoginChallenge:Decodable {
     
     
     public var rpId: String
-    public var challenge:String
-    public var allowCredentials: [AKCredential]
+    public var challenge:String 
     public var timeout: Int
     public var userVerification: String
     public var requireAddPasskey:Bool?
