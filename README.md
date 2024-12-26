@@ -620,3 +620,100 @@ If an error occurs in the call to the function, a AppKeyError exceptions will be
         NSLog(@"userName error '%@'", error.message)
     }
 ```
+
+## deleteAccount
+
+The *deleteAccount()* function is used by the client application to delete the account of the currently logged in user to AppKey. The user must either be logged in using a passkey, or using a social account. 
+
+```
+    public func deleteAccount() async throws -> Void
+```
+
+### Parameters
+
+None
+
+### Example
+
+```
+    do {
+        try await AppKeyAPIManager.shared.deleteAccount()
+    } catch let error as AppKeyError {
+        NSLog(@"deleteAccount error '%@'", error.message)
+    }
+```
+
+## socialLogin
+
+The *socialLogin()* function allows a client application to authenticate with AppKey using a social account, either Apple or Google. The user can log in via a passkey or a social account. Social login is supported because major providers are adopting passkeys as their authentication strategy. Additionally, it simplifies access by letting users delegate authentication to a social provider rather than creating a separate account.
+
+This function is included for completeness. Best practice is to first call *socialLogin()*; if the login fails because the account does not exist, fall back to *socialSignup()* to create the account.
+
+```
+    public func socialLogin(_ token: String, provider: String) async throws -> Void
+```
+
+### Parameters
+
+**token** : String - apple identity token or google auth token
+**provider** : String - name of provider either 'apple' or 'google'
+
+### Example
+
+```
+    do {
+         let user = try await AppKeyAPIManager.socialLogin(token, provider: provider)
+    } catch let error as AppKeyError {
+        NSLog(@"socialLogin error '%@'", error.message)
+    }
+```
+
+## socialSignup
+
+The *socialSignup()* function allows a client application to authenticate and create an account with AppKey using a social account, either Apple or Google. The user can log in via a passkey or a social account. Social signup is supported because major providers are adopting passkeys as their authentication strategy. Additionally, it simplifies access by letting users delegate authentication to a social provider rather than creating a separate account.
+
+```
+    public func socialSignup(_ token: String, email:String, provider:String, displayName: String, locale: String? = nil) async throws -> Void
+```
+
+### Parameters
+
+**token** : String - apple identity token or google auth token
+**email** : String - email returned by social provider
+**displayName**: String - it is givenName concatenated to familyName
+**provider** : String - name of provider either 'apple' or 'google'
+**locale** : String - default 'EN'
+
+### Example
+
+```
+    do {
+         let _ = try await AppKeyAPIManager.socialSignup(token, email:email, provider: self.provider, displayName: displayName)
+    } catch let error as AppKeyError {
+        NSLog(@"socialSignup error '%@'", error.message)
+    }
+```
+
+
+## verifySocialAccount
+
+The *verifySocialAccount()* function ensures the identity of a logged-in social account. It acts as a safeguard before calling the *deleteAccount()* function, which removes the user’s social account from AppKey.
+
+```
+    public func verifySocialAccount(_ token: String, provider: String) async throws -> AKAppUser
+```
+
+### Parameters
+
+**token** : String - apple identity token or google auth token
+**provider** : String - name of provider either 'apple' or 'google'
+
+### Example
+
+```
+    do {
+         let verifyComplete = try await AppKeyAPIManager.verifySocialAccount(token, provider: provider)
+    } catch let error as AppKeyError {
+        NSLog(@"verifySocialAccount error '%@'", error.message)
+    }
+```

@@ -902,7 +902,7 @@ extension String {
     }
     
     
-    // user must do verify ceramony process to get new access token before call this deleteAccount
+    // user must do login ceremony process to get new access token before call this deleteAccount
     @MainActor public func deleteAccount() async throws -> Bool {
         
         guard let appKeyRestAddress = self.appKeyRestAddress else {
@@ -1031,7 +1031,7 @@ extension String {
     
      
     
-    // Login into AppKey
+    // Social Login into AppKey
     @MainActor public func socialLogin(_ token: String, provider: String) async throws -> AKAppUser {
         
         
