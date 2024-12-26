@@ -179,7 +179,7 @@ extension String {
             let app = try JSONDecoder().decode(AKApplication.self, from: data)
             
             self.application = app
-             print(self.application)
+
             return app
             
         }
@@ -942,7 +942,7 @@ extension String {
     
     
     
-    // Singup into AppKey with Apple
+    // Singup into AppKey with Apple or Google
     @MainActor public func socialSignup(_ token: String, email:String, provider:String, displayName: String, locale: String? = nil) async throws -> AKAppUser {
         
         guard let appToken = self.appToken else {
@@ -1109,7 +1109,7 @@ extension String {
     
     
     
-    // Login into AppKey
+    // Verify Social Account for ownership
     @MainActor public func verifySocialAccount(_ token: String, provider: String) async throws -> AKAppUser {
         
         
