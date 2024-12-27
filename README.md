@@ -367,6 +367,7 @@ If an error occurs in the call to the function, a AppKeyError exceptions will be
 ### Parameters
 
 **handle** : String - this contains the user's handle (email or phone). 
+
 **assertion** : AKAssertion - this contains the AKAssertion object
 
 ### Example
@@ -450,6 +451,7 @@ If an error occurs in the call to the function, a AppKeyError exceptions will be
 ### Parameters
 
 **handle** : String - this contains the user's handle (email or phone). 
+
 **assertion** : AKAssertion - this contains the AKAssertion object
 
 ### Example
@@ -511,6 +513,7 @@ If an error occurs in the call to the function, a AppKeyError exceptions will be
 ### Parameters
 
 **handle** : String - this contains the user's handle (email or phone). 
+
 **assertion** : AKAssertion - this contains the AKAssertion object
 
 ### Example
@@ -656,6 +659,7 @@ This function is included for completeness. Best practice is to first call *soci
 ### Parameters
 
 **token** : String - apple identity token or google auth token
+
 **provider** : String - name of provider either 'apple' or 'google'
 
 ### Example
@@ -679,9 +683,13 @@ The *socialSignup()* function allows a client application to authenticate and cr
 ### Parameters
 
 **token** : String - apple identity token or google auth token
+
 **email** : String - email returned by social provider
+
 **displayName**: String - it is givenName concatenated to familyName
+
 **provider** : String - name of provider either 'apple' or 'google'
+
 **locale** : String - default 'EN'
 
 ### Example
@@ -706,6 +714,7 @@ The *verifySocialAccount()* function ensures the identity of a logged-in social 
 ### Parameters
 
 **token** : String - apple identity token or google auth token
+
 **provider** : String - name of provider either 'apple' or 'google'
 
 ### Example
