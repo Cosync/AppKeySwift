@@ -167,7 +167,7 @@ public struct AKPasskey:Codable {
     public let publicKey:String
     public let counter:Int
     public let deviceType:String
-    public let credentialBackedUp:String
+    public let credentialBackedUp:Bool
     public let name:String
     public let platform:String
     public let lastUsed: Date
