@@ -143,12 +143,14 @@ public struct AKAppUser:Codable {
     public let status:String
     public let appId:String
     public let loginProvider:String
+    public let authenticators:[AKPasskey]
     public var accessToken:String?
     public var signUpToken:String?
     public var jwt:String?
     public let userName:String?
     public let locale:String?
     public let lastLogin: String?
+    
 }
 
 @available(macOS 13.0, *)
@@ -160,7 +162,7 @@ public struct AKSignupData:Codable {
 }
 
 @available(macOS 13.0, *)
-struct AKPasskey:Codable {
+public struct AKPasskey:Codable {
     public let id:String
     public let publicKey:String
     public let counter:Int
