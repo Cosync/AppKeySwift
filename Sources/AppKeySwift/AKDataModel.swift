@@ -170,9 +170,9 @@ public struct AKPasskey:Codable {
     public let credentialBackedUp:Bool
     public let name:String
     public let platform:String
-    public let lastUsed: Date
-    public let createdAt: Date
-    public let updatedAt: Date
+    public let lastUsed: String
+    public let createdAt: String
+    public let updatedAt: String
     
 }
 
