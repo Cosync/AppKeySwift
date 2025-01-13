@@ -726,3 +726,108 @@ The *verifySocialAccount()* function ensures the identity of a logged-in social 
         NSLog(@"verifySocialAccount error '%@'", error.message)
     }
 ```
+
+## addPasskey
+
+The *addPasskey()* function starts the process of adding a passkey to an existing account. You may have already registered a passkey on one device (e.g., an iPhone running iOS) but now want to set one up on another device (e.g., an Android phone or an iOS device linked to a different Apple ID). The Add Passkey function lets you do exactly that.
+
+AppKey supports multiple passkeys per user account. Typically, you’d authenticate on the second device by scanning a FIDO2 QR code with the first device, since the second device doesn’t yet have a passkey. Once authenticated, you can then call Add Passkey on the second device to register a new passkey in its keychain—still using the first device as the trusted authenticator.
+
+To use Add Passkey, the user must be logged in and have a valid access token.
+
+The Add Passkey process consists of two REST API calls:
+
+* addPaskey
+* addPasskeyComplete
+
+```
+    public func addPasskey() async throws -> AKSignupChallenge
+```
+If an error occurs in the call to the function, a AppKeyError exceptions will be thrown.
+
+### Parameters
+
+**none**
+
+### Example
+
+```
+    do {
+        let challenge = try await AppKeyAPIManager.shared.addPasskey()
+    } catch let error as AppKeyError {
+        NSLog(@"addPasskey error '%@'", error.message)
+    }
+```
+
+## addPasskeyComplete
+
+The *addPasskeyComplete()* function finalizes the add passkey process after the passkey has been successfully created on the user’s device. This involves sending the FIDO2 attestation credentials to the AppKey server to confirm the new passkey.
+
+```
+    public func addPasskeyComplete(attest: AKAttestation) async throws -> AKAppUser
+```
+If an error occurs in the call to the function, a AppKeyError exceptions will be thrown.
+
+### Parameters
+
+**attest** : AKAttestation - this contains the user's attestation object
+
+### Example
+
+```
+    do {
+        let user = try await AppKeyAPIManager.shared.addPasskeyComplete(attest: self.attestation)
+    } catch let error as AppKeyError {
+        NSLog(@"addPasskeyComplete error '%@'", error.message)
+    }
+```
+
+## updatePasskey
+
+The *updatePasskey()* function allows a user to rename a passkey associated with their account. Since users can have multiple passkeys stored on different device keychains, assigning distinct names helps differentiate them for easier identification and management.
+
+```
+    public func updatePasskey(keyId:String, keyName:String) async throws -> AKAppUser
+```
+If an error occurs in the call to the function, a AppKeyError exceptions will be thrown.
+
+### Parameters
+
+**keyId** : String - this contains the key id for the user's passkey
+**keyName** : String - this contains the new key name for the user's passkey
+
+### Example
+
+```
+    do {
+        let user = try await AppKeyAPIManager.shared.updatePasskey(keyId: self.keyId, keyName: self.keyName)
+    } catch let error as AppKeyError {
+        NSLog(@"updatePasskey error '%@'", error.message)
+    }
+```
+
+## removePasskey
+
+The *removePasskey()* function deletes a passkey from the logged-in user’s account. Use this function with caution, as removing all passkeys could leave the user locked out of their account.
+
+```
+    public func removePasskey(keyId:String, keyName:String) async throws -> AKAppUser
+```
+If an error occurs in the call to the function, a AppKeyError exceptions will be thrown.
+
+### Parameters
+
+**keyId** : String - this contains the key id for the user's passkey
+
+### Example
+
+```
+    do {
+        let user = try await AppKeyAPIManager.shared.removePasskey(keyId: self.keyId)
+    } catch let error as AppKeyError {
+        NSLog(@"removePasskey error '%@'", error.message)
+    }
+```
+
+
+

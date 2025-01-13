@@ -762,222 +762,6 @@ extension String {
         }
     }
     
-    
-    @MainActor public func addPasskey() async throws -> AKSignupChallenge {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/addPasskey"
-        
-        do {
-            
-            var requestBodyComponents = URLComponents()
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
-            
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            // print("verify return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let result = try JSONDecoder().decode(AKSignupChallenge.self, from: data)
-            
-            return result
-            
-        }
-        catch let error as AppKeyError {
-           
-            throw error
-        }
-        catch {
-            
-            throw error
-        }
-        
-    }
-    
-    
-    
-    
-    @MainActor public func addPasskeyComplete(attest:AKAttestation) async throws -> AKAppUser {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/addPasskeyComplete"
-        
-        do {
-            
-            let attetstRsponse = "{\"attestationObject\": \"\(attest.response.attestationObject)\", \"clientDataJSON\": \"\(attest.response.clientDataJSON)\"}"
-            
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [
-                                                URLQueryItem(name: "id", value: attest.id),
-                                                URLQueryItem(name: "response", value: attetstRsponse )
-            ]
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-             
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
-            
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            //print("addPasskeyComplete return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
-            
-        }
-        catch let error as AppKeyError {
-           
-            throw error
-        }
-        catch {
-            
-            throw error
-        }
-        
-    }
-    
-    
-    @MainActor public func updatePasskey(keyId:String, keyName:String) async throws -> AKAppUser? {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/updatePasskey"
-        
-        do {
-            
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [
-                                                URLQueryItem(name: "keyId", value: keyId),
-                                                URLQueryItem(name: "keyName", value: keyName)
-            ]
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-             
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
-            
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
-            
-        }
-        catch let error as AppKeyError {
-           
-            throw error
-        }
-        catch {
-            
-            throw error
-        }
-        
-    }
-    
-    
-    
-    
-    @MainActor public func removePasskey(keyId:String) async throws -> AKAppUser? {
-        
-        guard let appKeyRestAddress = self.appKeyRestAddress else {
-            throw AppKeyError.appKeyConfiguration
-        }
-
-        let url = "\(appKeyRestAddress)/api/appuser/removePasskey"
-        
-        do {
-            
-            var requestBodyComponents = URLComponents()
-            requestBodyComponents.queryItems = [
-                                                URLQueryItem(name: "keyId", value: keyId)
-            ]
-            
-            let config = URLSessionConfiguration.default
-            let session = URLSession(configuration: config)
-            let url = URL(string: url)!
-             
-            
-            var urlRequest = URLRequest(url: url)
-            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
-            urlRequest.httpMethod = "POST"
-            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
-            
-            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
-            
-            
-            let (data, response) = try await session.data(for: urlRequest)
-            try AppKeyError.checkResponse(data: data, response: response)
-            
-            //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
-            
-        }
-        catch let error as AppKeyError {
-           
-            throw error
-        }
-        catch {
-            
-            throw error
-        }
-        
-    }
-    
-    
-    
     @MainActor public func logout() { 
         
         self.appUser = nil
@@ -1400,7 +1184,213 @@ extension String {
 
     }
     
-     
+    
+    @MainActor public func addPasskey() async throws -> AKSignupChallenge {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/addPasskey"
+        
+        do {
+            
+            var requestBodyComponents = URLComponents()
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            // print("verify return data \(data.base64URLEncode().base64Decoded()!)")
+            
+            let result = try JSONDecoder().decode(AKSignupChallenge.self, from: data)
+            
+            return result
+            
+        }
+        catch let error as AppKeyError {
+           
+            throw error
+        }
+        catch {
+            
+            throw error
+        }
+        
+    }
+    
+    @MainActor public func addPasskeyComplete(attest:AKAttestation) async throws -> AKAppUser {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/addPasskeyComplete"
+        
+        do {
+            
+            let attetstRsponse = "{\"attestationObject\": \"\(attest.response.attestationObject)\", \"clientDataJSON\": \"\(attest.response.clientDataJSON)\"}"
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                                                URLQueryItem(name: "id", value: attest.id),
+                                                URLQueryItem(name: "response", value: attetstRsponse )
+            ]
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+             
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            //print("addPasskeyComplete return data \(data.base64URLEncode().base64Decoded()!)")
+            
+            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            self.appUser = user
+            
+            return user
+            
+        }
+        catch let error as AppKeyError {
+           
+            throw error
+        }
+        catch {
+            
+            throw error
+        }
+        
+    }
+    
+    
+    @MainActor public func updatePasskey(keyId:String, keyName:String) async throws -> AKAppUser? {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/updatePasskey"
+        
+        do {
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                                                URLQueryItem(name: "keyId", value: keyId),
+                                                URLQueryItem(name: "keyName", value: keyName)
+            ]
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+             
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
+            
+            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            self.appUser = user
+            
+            return user
+            
+        }
+        catch let error as AppKeyError {
+           
+            throw error
+        }
+        catch {
+            
+            throw error
+        }
+        
+    }
+    
+    @MainActor public func removePasskey(keyId:String) async throws -> AKAppUser? {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/removePasskey"
+        
+        do {
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                                                URLQueryItem(name: "keyId", value: keyId)
+            ]
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+             
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": self.accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
+            
+            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            self.appUser = user
+            
+            return user
+            
+        }
+        catch let error as AppKeyError {
+           
+            throw error
+        }
+        catch {
+            
+            throw error
+        }
+        
+    }
     
 }
 
