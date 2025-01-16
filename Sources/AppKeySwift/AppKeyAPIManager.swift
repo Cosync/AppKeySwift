@@ -1185,6 +1185,50 @@ extension String {
     }
     
     
+    
+    
+    @MainActor public func updateProfile(displayName:String) async throws -> Bool {
+        
+        guard let appKeyRestAddress = self.appKeyRestAddress else {
+            throw AppKeyError.appKeyConfiguration
+        }
+
+        let url = "\(appKeyRestAddress)/api/appuser/updateProfile"
+        do {
+            
+            
+            var requestBodyComponents = URLComponents()
+            requestBodyComponents.queryItems = [
+                URLQueryItem(name: "displayName", value: displayName)
+            ]
+            
+            
+            let config = URLSessionConfiguration.default
+            let session = URLSession(configuration: config)
+            let url = URL(string: url)!
+            
+            var urlRequest = URLRequest(url: url)
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
+            urlRequest.httpMethod = "POST"
+            urlRequest.allHTTPHeaderFields = ["access-token": accessToken]
+            
+            urlRequest.httpBody = requestBodyComponents.query?.data(using: .utf8)
+            
+            
+            let (data, response) = try await session.data(for: urlRequest)
+            try AppKeyError.checkResponse(data: data, response: response)
+            
+            return true
+        }
+        catch let error as AppKeyError {
+            throw error
+        }
+        catch {
+            throw error
+        }
+    }
+    
     @MainActor public func addPasskey() async throws -> AKSignupChallenge {
         
         guard let appKeyRestAddress = self.appKeyRestAddress else {
