@@ -47,7 +47,7 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
         guard let authorizationError = error as? ASAuthorizationError else {
             print("Unexpected authorization error: \(error.localizedDescription)")
             
-            errorResponse = error.localizedDescription
+            errorResponse = "\(Date.now): \(error.localizedDescription)" 
             
             return
         }
@@ -57,14 +57,21 @@ public class AKPasskeysManager:NSObject, ObservableObject, ASAuthorizationContro
             // This is a good time to show a traditional login form, or ask the user to create an account.
         
             let error = (error as NSError).userInfo
-            errorResponse = error["NSLocalizedFailureReason"] as? String
+            if (error["NSLocalizedFailureReason"] != nil) {
+                errorResponse = error["NSLocalizedFailureReason"] as? String
+            }
+            else {
+                errorResponse = "\(Date.now): User Canceled."
+            }
+            
             status = "canceled"
         } else {
             // Another ASAuthorization error.
             // Note: The userInfo dictionary contains useful information.
             let error = (error as NSError).userInfo
-            print("Error: \(error)")
-            errorResponse = error["NSLocalizedFailureReason"] as? String
+            
+            let msg = error["NSLocalizedFailureReason"] as? String
+            errorResponse = "\(Date.now): \(msg ?? "Invalid Authentication Key")"
             status = "error"
         }
         
