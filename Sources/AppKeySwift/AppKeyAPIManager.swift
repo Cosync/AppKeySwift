@@ -1023,6 +1023,7 @@ extension String {
             throw error
         }
         catch {
+            print(error.localizedDescription)
             throw AppKeyError.internalServerError
         }
 
