@@ -952,8 +952,6 @@ extension String {
             throw AppKeyError.appKeyConfiguration
         }
 
-        //let _ = try await self.getApp()
-
         if provider == "google"{
             guard self.application!.googleLoginEnabled == true else {
                 throw AppKeyError.googleLoginNotSupported
@@ -993,6 +991,8 @@ extension String {
             
             let (data, response) = try await session.data(for: urlRequest)
             
+             
+            
             // ensure there is no error for this HTTP response
             try AppKeyError.checkResponse(data: data, response: response)
             
@@ -1023,8 +1023,7 @@ extension String {
             throw error
         }
         catch {
-            print(error.localizedDescription)
-            throw AppKeyError.internalServerError
+            throw error
         }
 
     }
@@ -1100,8 +1099,7 @@ extension String {
              throw error
         }
         catch {
-            print(error.localizedDescription)
-            throw AppKeyError.internalServerError
+            throw error
         }
 
 
@@ -1178,8 +1176,7 @@ extension String {
              throw error
         }
         catch {
-            print(error.localizedDescription)
-            throw AppKeyError.internalServerError
+            throw error
         }
 
 
