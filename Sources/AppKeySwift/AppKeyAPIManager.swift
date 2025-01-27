@@ -427,17 +427,8 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            guard let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] else {
-                
-                throw AppKeyError.internalServerError
-            }
-            
-            print("login json \(json)")
-            
-            if json["requireAddPasskey"] is Bool {
-                throw AppKeyError.passkeyNotExist
-            }
-            
+            print("login jsonString \(data.base64URLEncode().base64Decoded() ?? "" )") 
+             
             let result = try JSONDecoder().decode(AKLoginChallenge.self, from: data)
             return result
             
