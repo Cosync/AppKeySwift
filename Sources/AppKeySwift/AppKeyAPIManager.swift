@@ -81,7 +81,7 @@ extension String {
     public var application:AKApplication? = nil
     public var accessToken:String = ""
     public var jwt: String?
-   
+    public var idToken: String?
     
     // Configure
     @MainActor public func configure(appToken: String, appKeyRestAddress: String = "", rawPublicKey: String = "") {
@@ -366,22 +366,7 @@ extension String {
             
             print("signupComplete jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
             
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            
+            self.appUser = try makeUser(data) 
             return true
             
         }
@@ -486,23 +471,8 @@ extension String {
             
             print("loginComplete jsonString \(data.base64URLEncode().base64Decoded() ?? "" )")
             
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
         }
         catch let error as AppKeyError {
             throw error
@@ -602,24 +572,7 @@ extension String {
             try AppKeyError.checkResponse(data: data, response: response)
             
             // print("loginAnonymousComplete data \(data.base64URLEncode().base64Decoded()!)")
-            
-            
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
+            self.appUser = try makeUser(data)
             
             return true
         }
@@ -726,21 +679,8 @@ extension String {
             
             var user = try JSONDecoder().decode(AKAppUser.self, from: data)
             
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
             
              
         }
@@ -981,32 +921,12 @@ extension String {
         do {
             
             let (data, response) = try await session.data(for: urlRequest)
-            
-             
-            
             // ensure there is no error for this HTTP response
             try AppKeyError.checkResponse(data: data, response: response)
             
             
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
              
             
         }
@@ -1067,23 +987,8 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
          
         }
         catch let error as AppKeyError {
@@ -1096,7 +1001,31 @@ extension String {
 
     }
     
-    
+    func makeUser(_ data: Data) throws -> AKAppUser {
+        do {
+            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
+            
+            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
+                user.accessToken = json["access-token"] as? String
+                user.jwt = json["jwt"] as? String
+                user.idToken = json["idToken"] as? String
+                
+                self.jwt = user.jwt
+                self.idToken = user.idToken
+            }
+            
+            if let accessToken = user.accessToken {
+                self.accessToken = accessToken
+            }
+            
+            return user
+            
+        }
+        catch {
+             throw error
+        }
+       
+    }
     
     // Verify Social Account for ownership
     @MainActor public func verifySocialAccount(_ token: String, provider: String) async throws -> AKAppUser {
@@ -1144,23 +1073,8 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            var user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
-                user.accessToken = json["access-token"] as? String
-                user.jwt = json["jwt"] as? String
-            }
-            
-            
-            self.appUser = user
-            
-            if let accessToken = user.accessToken {
-                self.accessToken = accessToken
-            }
-            if let jwt = user.jwt {
-                self.jwt = jwt
-            }
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
          
         }
         catch let error as AppKeyError {
@@ -1301,11 +1215,8 @@ extension String {
             
             //print("addPasskeyComplete return data \(data.base64URLEncode().base64Decoded()!)")
             
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
             
         }
         catch let error as AppKeyError {
@@ -1355,11 +1266,8 @@ extension String {
             
             //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
             
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
             
         }
         catch let error as AppKeyError {
@@ -1405,13 +1313,8 @@ extension String {
             let (data, response) = try await session.data(for: urlRequest)
             try AppKeyError.checkResponse(data: data, response: response)
             
-            //print("removePasskey return data \(data.base64URLEncode().base64Decoded()!)")
-            
-            let user = try JSONDecoder().decode(AKAppUser.self, from: data)
-            
-            self.appUser = user
-            
-            return user
+            self.appUser = try makeUser(data)
+            return self.appUser!
             
         }
         catch let error as AppKeyError {

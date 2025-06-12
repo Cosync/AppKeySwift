@@ -143,9 +143,10 @@ public struct AKAppUser:Codable {
     public let status:String
     public let appId:String
     public let loginProvider:String
-    public let authenticators:[AKPasskey]?
+    public let authenticators:[AKPasskey]
     public var accessToken:String?
     public var signUpToken:String?
+    public var idToken:String?
     public var jwt:String?
     public let userName:String?
     public let locale:String?
