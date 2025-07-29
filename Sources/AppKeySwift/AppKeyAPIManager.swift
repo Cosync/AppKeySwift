@@ -1008,7 +1008,7 @@ extension String {
             if let json = (try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers)) as? [String: Any] {
                 user.accessToken = json["access-token"] as? String
                 user.jwt = json["jwt"] as? String
-                user.idToken = json["idToken"] as? String
+                user.idToken = json["id-token"] as? String
                 
                 self.jwt = user.jwt
                 self.idToken = user.idToken

@@ -127,6 +127,7 @@ public struct AKApplication:Codable {
     public let userNamesEnabled:Bool
     public let googleLoginEnabled:Bool
     public let appleLoginEnabled:Bool
+    public let firebaseLoginEnabled:Bool
     public let googleClientId:String?
     public let appleBundleId:String?
     public let relyPartyId:String?
